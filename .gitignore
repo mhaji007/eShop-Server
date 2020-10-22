@@ -1,6 +1,11 @@
 # dependencies
 node_modules
 /node_modules
+config/
+/config
+fbServiceAccountKey.json
+firebase/
+firebase/index.js
 
 # misc
 .env
