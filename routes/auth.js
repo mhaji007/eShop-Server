@@ -13,7 +13,7 @@ const {createOrUpdateUser} = require("../controllers/auth");
   // Receieves token from the frontend
   // But first we need to make sure the
   // token is valid via middleware (authCheck)
-  router.put('/create-or-update-user', authCheck, createOrUpdateUser);
+  router.post('/create-or-update-user', authCheck, createOrUpdateUser);
 
   // Export router so
   // it can be used in the server.js
