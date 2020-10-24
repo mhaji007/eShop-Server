@@ -6,7 +6,7 @@ const router = express.Router();
 const {authCheck} = require('../middlewares/auth');
 
 // Import controllers
-const {createOrUpdateUser} = require("../controllers/auth");
+const {createOrUpdateUser, currentUser} = require("../controllers/auth");
 
   // Routes
 
@@ -14,6 +14,11 @@ const {createOrUpdateUser} = require("../controllers/auth");
   // But first we need to make sure the
   // token is valid via middleware (authCheck)
   router.post('/create-or-update-user', authCheck, createOrUpdateUser);
+  // get request could also be used here
+  // but since get request is easier to make (e.g., directly through browser)
+  // as opposed to post (which should be made programmatically)
+  // post is used 
+  router.post('/current-user', authCheck, currentUser);
 
   // Export router so
   // it can be used in the server.js

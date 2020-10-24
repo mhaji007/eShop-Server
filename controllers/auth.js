@@ -1,4 +1,4 @@
-// Bring in user model
+// Bring in the user model
 const User = require("../models/user");
 
 // Create or update user information based on verification
@@ -11,12 +11,15 @@ exports.createOrUpdateUser = async (req, res) => {
   // Destructure values from autCheck
   const { name, picture, email } = req.user;
   // If user already exits in the database, update
-  // Find user based on email {email:email} and update name and picture
+  // find user based on email {email:req.user.email} and update name and picture
   // {new:true} returns updated user information / prevents returning the
   // older information
+  // If user is not found create the user
+  // Extract the first part of the email
+  // and use it as the username
   const user = await User.findOneAndUpdate(
     { email },
-    { name, picture },
+    { name: email.split("@")[0], picture },
     { new: true }
   );
 
@@ -30,13 +33,26 @@ exports.createOrUpdateUser = async (req, res) => {
     console.log("User updated", user);
     res.json(user);
     // If user is not found create the user
+    // Extract the first part of the email
+    // and use it as the username
   } else {
     const newUser = await new User({
       email,
-      name,
+      name: email.split("@")[0],
       picture,
     }).save();
     console.log("User Created", newUser);
     res.json(newUser);
   }
 };
+
+// Get current user's information
+exports.currentUser = async (req, res) => {
+  // user is made available on the req object
+  // throught the authCheck middleware
+  // find user based on email {email:req.user.email}
+  User.findOne({email: req.user.email}).exec((err, user) => {
+    if(err) throw new Error(err);
+    res.json(user);
+  })
+}
