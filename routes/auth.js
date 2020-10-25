@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 // Import middlewares
-const {authCheck} = require('../middlewares/auth');
+const {authCheck, adminCheck} = require('../middlewares/auth');
 
 // Import controllers
 const {createOrUpdateUser, currentUser} = require("../controllers/auth");
@@ -17,8 +17,10 @@ const {createOrUpdateUser, currentUser} = require("../controllers/auth");
   // get request could also be used here
   // but since get request is easier to make (e.g., directly through browser)
   // as opposed to post (which should be made programmatically)
-  // post is used 
+  // post is used
   router.post('/current-user', authCheck, currentUser);
+  // Protected admin route
+  router.post('/current-user', authCheck, adminCheck, currentUser);
 
   // Export router so
   // it can be used in the server.js
