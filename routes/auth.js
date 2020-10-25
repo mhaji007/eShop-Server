@@ -20,7 +20,7 @@ const {createOrUpdateUser, currentUser} = require("../controllers/auth");
   // post is used
   router.post('/current-user', authCheck, currentUser);
   // Protected admin route
-  router.post('/current-user', authCheck, adminCheck, currentUser);
+  router.post('/current-admin', authCheck, adminCheck, currentUser);
 
   // Export router so
   // it can be used in the server.js
