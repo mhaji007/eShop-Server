@@ -47,6 +47,9 @@ exports.update = async (req, res) => {
   try {
     const updated = await Category.findOneAndUpdate(
       // Find category based on slug
+      // req.params.slug looks for a
+      // route parameter with a key
+      // of slug
       { slug: req.params.slug },
       { name, slug: slugify(name) },
       // Optional
