@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
 
-// middlewares
+// Import middlewares
 const { authCheck, adminCheck } = require("../middlewares/auth");
 
-// controller
+// Import controllers
 const { create, read, update, remove, list } = require("../controllers/subcategory");
 
-// routes
+// Routes
 router.post("/sub", authCheck, adminCheck, create);
 router.get("/subs", list);
 router.get("/sub/:slug", read);
