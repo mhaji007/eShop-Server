@@ -15,5 +15,22 @@ exports.create = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(400).send("Create product failed");
+
+    // // Send specific message from mongoose
+    // res.status(400).json({
+    //   err:err.message
+    // })
+  }
+};
+
+exports.read = async (req, res) => {
+  try {
+    // Make sure data is received from the frontend
+    console.log(req.body);
+    // let products = await Product.find({}).populate('category');
+    let products = await Product.find({});
+    res.json(products);
+  } catch (err) {
+    console.log(err);
   }
 };

@@ -46,26 +46,26 @@ const productSchema = new mongoose.Schema(
       trim: true,
       maxlength: [32, 'Price cannot exceed 32 characters'],
     },
-    category: {
-      type: ObjectId,
-      ref: "Category",
-    },
-    // Subcategories will
-    // be more than one and
-    // therefore of type array.
-    // There will be one main
-    // category and many subcategories
-    // based on that category
-    // Instead of saving the entire
-    // subcategory information, we save just
-    // the id and later use the populate method
-    // to retrieve the entire information
-    subs: [
-      {
-        type: ObjectId,
-        ref: "Sub",
-      },
-    ],
+    // category: {
+    //   type: ObjectId,
+    //   ref: "Category",
+    // },
+    // // Subcategories will
+    // // be more than one and
+    // // therefore of type array.
+    // // There will be one main
+    // // category and many subcategories
+    // // based on that category
+    // // Instead of saving the entire
+    // // subcategory information, we save just
+    // // the id and later use the populate method
+    // // to retrieve the entire information
+    // subs: [
+    //   {
+    //     type: ObjectId,
+    //     ref: "Sub",
+    //   },
+    // ],
     // Used for keeping
     // stock
     quantity: Number,
@@ -73,9 +73,9 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    images: {
-      type: Array,
-    },
+    // images: {
+    //   type: Array,
+    // },
     shipping: {
       type: String,
       enum: ["Yes", "No"],

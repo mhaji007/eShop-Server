@@ -1,7 +1,7 @@
 const Category = require("../models/category");
 const slugify = require("slugify");
 
-// return an object
+// Return an object
 // containing the information of the category just created
 exports.create = async (req, res) => {
   try {
