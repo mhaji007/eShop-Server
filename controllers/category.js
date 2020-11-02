@@ -1,5 +1,5 @@
 const Category = require("../models/category");
-const Subcategoy = require("../models/subcategory");
+const Subcategory = require("../models/subcategory");
 const slugify = require("slugify");
 
 // Return an object
@@ -80,8 +80,9 @@ exports.remove = async (req, res) => {
 // containing infomation for all the subcategoriers that share the same parent
 // alternative to async await
 exports.getSubs = (req, res) => {
-  Subcategory.find({parent: req.params._id}.exec((err, subcategoies) => {
+  Subcategory.find({parent: req.params._id}).exec((err, subcategories) => {
     if(err) console.log(err);
-    res.json(subcategoies);
-  }))
+    res.json(subcategories);
+  })
 }
+
