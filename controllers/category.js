@@ -1,4 +1,5 @@
 const Category = require("../models/category");
+const Subcategoy = require("../models/subcategory");
 const slugify = require("slugify");
 
 // Return an object
@@ -74,3 +75,13 @@ exports.remove = async (req, res) => {
     res.status(400).send("Create delete failed");
   }
 };
+
+// Return an object
+// containing infomation for all the subcategoriers that share the same parent
+// alternative to async await
+exports.getSubs = (req, res) => {
+  Subcategory.find({parent: req.params._id}.exec((err, subcategoies) => {
+    if(err) console.log(err);
+    res.json(subcategoies);
+  }))
+}

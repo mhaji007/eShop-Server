@@ -46,10 +46,10 @@ const productSchema = new mongoose.Schema(
       trim: true,
       maxlength: [32, 'Price cannot exceed 32 characters'],
     },
-    // category: {
-    //   type: ObjectId,
-    //   ref: "Category",
-    // },
+    category: {
+      type: ObjectId,
+      ref: "Category",
+    },
     // // Subcategories will
     // // be more than one and
     // // therefore of type array.
@@ -60,12 +60,12 @@ const productSchema = new mongoose.Schema(
     // // subcategory information, we save just
     // // the id and later use the populate method
     // // to retrieve the entire information
-    // subs: [
-    //   {
-    //     type: ObjectId,
-    //     ref: "Sub",
-    //   },
-    // ],
+    subs: [
+      {
+        type: ObjectId,
+        ref: "Sub",
+      },
+    ],
     // Used for keeping
     // stock
     quantity: Number,
