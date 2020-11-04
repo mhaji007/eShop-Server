@@ -5,10 +5,13 @@ const router = express.Router();
 const { authCheck, adminCheck } = require("../middlewares/auth");
 
 // Import controllers
-const { create, read } = require("../controllers/product");
+const { create, listAll } = require("../controllers/product");
 
 // Routes
 router.post("/product", authCheck, adminCheck, create);
-router.get("/products", read);
+
+// products/100
+router.get("/products/:count", listAll);
+// router.get("/products", read);
 
 module.exports = router;

@@ -23,14 +23,26 @@ exports.create = async (req, res) => {
   }
 };
 
-exports.read = async (req, res) => {
-  try {
-    // Make sure data is received from the frontend
-    console.log(req.body);
-    // let products = await Product.find({}).populate('category');
-    let products = await Product.find({});
-    res.json(products);
-  } catch (err) {
-    console.log(err);
-  }
+// exports.read = async (req, res) => {
+//   try {
+//     // Make sure data is received from the frontend
+//     console.log(req.body);
+//     // let products = await Product.find({}).populate('category');
+//     let products = await Product.find({});
+//     res.json(products);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
+
+exports.listAll = async (req, res) => {
+  let products = await Product.find({})
+    .limit(parseInt(req.params.count))
+    .populate("category")
+    .populate("subs")
+    .sort([["createdAt", "desc"]])
+    .exec();
+  res.json(products);
 };
+
