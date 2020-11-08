@@ -17,18 +17,23 @@ exports.upload = async (req, res) => {
   // If form data was used, image could be accessed via
   // req.files.file.path
   // result contains the uploaded image url
-  let result = await cloudinary.uploader.upload(req.body.image, {
-    // Publicly visible id
-    public_id: `${Date.now()}`,
-    // Automatically use image format as resource type
-    // e.g., jpeg, png, etc.
-    resource_type: "auto",
-  });
-  // Send image url from cloudinary to the frontend
-  res.json({
-    public_id: result.public_id,
-    url: result.secure_url,
-  });
+  try {
+    let result = await cloudinary.uploader.upload(req.body.image, {
+      // Publicly visible id
+      public_id: `${Date.now()}`,
+      // Automatically use image format as resource type
+      // e.g., jpeg, png, etc.
+      resource_type: "auto",
+    });
+    // Send image url from cloudinary to the frontend
+    res.json({
+      public_id: result.public_id,
+      url: result.secure_url,
+    });
+  } catch (err) {
+    console.log("Cloudinary upload error --->", err);
+    return res.status(400).send("Cloudinary upload failed");
+  }
 };
 
 // Endpoint for removing images
@@ -36,13 +41,18 @@ exports.upload = async (req, res) => {
 exports.remove = (req, res) => {
   // Send image id as the identifier
   // of which image is to be deleted
-  let image_id = req.body.public_id;
+  try {
+    let image_id = req.body.public_id;
 
-  cloudinary.uploader.destroy(image_id, (err, result) => {
-    if (err) return res.json({ success: false, err });
-    // res.status(200).send("ok")
-    // status 200 is the default status
-    // and here could be done away with
-    res.send("ok");
-  });
+    cloudinary.uploader.destroy(image_id, (err, result) => {
+      if (err) return res.json({ success: false, err });
+      // res.status(200).send("ok")
+      // status 200 is the default status
+      // and here could be done away with
+      res.send("ok");
+    });
+  } catch (err) {
+    console.log("Cloudinary remove error --->", err);
+    return res.status(400).send("Cloudinary remove failed");
+  }
 };

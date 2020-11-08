@@ -11,26 +11,41 @@ exports.create = async (req, res) => {
     const { name } = req.body;
     // const category = await new Category({ name, slug: slugify(name) }).save();
     // res.json(category);
-    res.json(await new Category({ name, slug: slugify(name).toLowerCase()}).save());
+    res.json(
+      await new Category({ name, slug: slugify(name).toLowerCase() }).save()
+    );
   } catch (err) {
-    // console.log(err);
-    res.status(400).send("Create category failed");
+    console.log("Category create error --->", err);
+    res.status(400).send("Category category failed");
   }
 };
 
 // Return an array of objects
 // containing the information for all the created categories
-exports.list = async (req, res) =>{
+exports.list = async (req, res) => {
   // find({}) returns all the collection
   // sort({createdAt: -1}) returns latest categories at the top
-  res.json(await Category.find({}).sort({ createdAt: -1 }).exec());
-}
+  try {
+    let list = await Category.find({}).sort({ createdAt: -1 }).exec();
+    res.json(list);
+  } catch (err) {
+    {
+      console.log("Category list error --->", err);
+      res.status(400).send("Category list failed");
+    }
+  }
+};
 
 // Return an object
 // containing the information for a single requested category
 exports.read = async (req, res) => {
-// req.params contains the route parameter (i.e., the requested category)
+  // req.params contains the route parameter (i.e., the requested category)
   let category = await Category.findOne({ slug: req.params.slug }).exec();
+
+  if (err) {
+    console.log("Category read error --->", err);
+    res.status(400).send("Category read failed");
+  }
 
   // // If not using async await the above would be written as
   // let category = await Category.findOne({ slug: req.params.slug }).exec((err, data) => {
@@ -62,7 +77,8 @@ exports.update = async (req, res) => {
     );
     res.json(updated);
   } catch (err) {
-    res.status(400).send("Create update failed");
+    console.log("Category updated error --->", err);
+    res.status(400).send("Category update failed");
   }
 };
 // Return an object
@@ -72,7 +88,8 @@ exports.remove = async (req, res) => {
     const deleted = await Category.findOneAndDelete({ slug: req.params.slug });
     res.json(deleted);
   } catch (err) {
-    res.status(400).send("Create delete failed");
+    console.log("Category remove error --->", err);
+    res.status(400).send("Category delete failed");
   }
 };
 
@@ -80,9 +97,11 @@ exports.remove = async (req, res) => {
 // containing infomation for all the subcategoriers that share the same parent
 // alternative to async await
 exports.getSubs = (req, res) => {
-  Subcategory.find({parent: req.params._id}).exec((err, subcategories) => {
-    if(err) console.log(err);
+  Subcategory.find({ parent: req.params._id }).exec((err, subcategories) => {
+    if (err) {
+      console.log("Category getsubs error --->", err);
+      res.status(400).send("Category getSubs failed");
+    }
     res.json(subcategories);
-  })
-}
-
+  });
+};
