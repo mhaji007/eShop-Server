@@ -5,7 +5,7 @@ const router = express.Router();
 const { authCheck, adminCheck } = require("../middlewares/auth");
 
 // Import controllers
-const { create, listAll , remove, read, update} = require("../controllers/product");
+const { create, list, listAll , remove, read, update} = require("../controllers/product");
 
 // Routes
 router.post("/product", authCheck, adminCheck, create);
@@ -19,7 +19,19 @@ router.delete("/product/:slug", authCheck, adminCheck, remove);
 // Return a single product
 router.get("/product/:slug", read);
 
-
+// Return the updated product
 router.put("/product/:slug", authCheck, adminCheck, update);
+
+
+// Return new arriavls (recently created products)
+
+// Post request is used
+// because send parameters (e.g., for sorting) inside body
+// is easier
+router.post("/products", list);
+
+
+
+
 
 module.exports = router;

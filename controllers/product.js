@@ -99,3 +99,22 @@ exports.update = async (req, res) => {
     return res.status(400).send("Product update failed");
   }
 };
+
+// Lists new arrivals
+exports.list = async (req, res) => {
+  try {
+    const { sort, order, limit } = req.body;
+
+    const products = await Product.find({})
+      .populate("category")
+      .populate("subs")
+      .sort([[sort, order]])
+      .limit(limit)
+      .exec();
+
+    res.json(products);
+  } catch (err) {
+    console.log("Product Update error --->", err);
+    return res.status(400).send("Product list failed");
+  }
+};
