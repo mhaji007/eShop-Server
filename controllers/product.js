@@ -50,6 +50,9 @@ exports.listAll = async (req, res) => {
   }
 };
 
+
+
+
 exports.remove = async (req, res) => {
   try {
     const deleted = await Product.findOneAndRemove({
@@ -100,24 +103,55 @@ exports.update = async (req, res) => {
   }
 };
 
-// List new arrivals
+
+// // List new arrivals without pagination
+// exports.list = async (req, res) => {
+//   try {
+//     const { sort, order, limit } = req.body;
+
+//     const products = await Product.find({})
+//       .populate("category")
+//       .populate("subs")
+//       .sort([[sort, order]])
+//       .limit(limit)
+//       .exec();
+
+//     res.json(products);
+//   } catch (err) {
+//     console.log("Product list error --->", err);
+//     return res.status(400).send("Product list failed");
+//   }
+// };
+
+
+// List new arrivals with pagination
 exports.list = async (req, res) => {
   try {
-    const { sort, order, limit } = req.body;
-
+    const { sort, order, page } = req.body;
+    const currentPage = page || 1;
+    // How many products per page
+    const perPage = 3;
+    // For example request coming in from frontend for page 3
+    // we need to skip 6 products
+    // (two pages, each containing 3 products ) and
+    // start form 7 onwards
     const products = await Product.find({})
+      // Each time based on the page number
+      // skip the previous page
+      .skip((currentPage - 1) * perPage)
       .populate("category")
       .populate("subs")
       .sort([[sort, order]])
-      .limit(limit)
+      .limit(perPage)
       .exec();
 
     res.json(products);
   } catch (err) {
-    console.log("Product list error --->", err);
-    return res.status(400).send("Product list failed");
-  }
-};
+    console.log("Product listAll error --->", err);
+    return res.status(400).send("Product listAll failed");
+}
+
+}
 
 // Find total number of documents (products)
 exports.productsCount = async (req, res) => {
@@ -130,3 +164,5 @@ exports.productsCount = async (req, res) => {
     return res.status(400).send("Products count failed");
   }
 };
+
+
