@@ -100,7 +100,7 @@ exports.update = async (req, res) => {
   }
 };
 
-// Lists new arrivals
+// List new arrivals
 exports.list = async (req, res) => {
   try {
     const { sort, order, limit } = req.body;
@@ -114,7 +114,19 @@ exports.list = async (req, res) => {
 
     res.json(products);
   } catch (err) {
-    console.log("Product Update error --->", err);
+    console.log("Product list error --->", err);
     return res.status(400).send("Product list failed");
+  }
+};
+
+// Find total number of documents (products)
+exports.productsCount = async (req, res) => {
+  try {
+    const total = await Product.find({}).estimatedDocumentCount().exec();
+
+    res.json(total);
+  } catch (err) {
+    console.log("Products count error --->", err);
+    return res.status(400).send("Products count failed");
   }
 };
