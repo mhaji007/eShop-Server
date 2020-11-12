@@ -50,9 +50,6 @@ exports.listAll = async (req, res) => {
   }
 };
 
-
-
-
 exports.remove = async (req, res) => {
   try {
     const deleted = await Product.findOneAndRemove({
@@ -103,7 +100,6 @@ exports.update = async (req, res) => {
   }
 };
 
-
 // // List new arrivals without pagination
 // exports.list = async (req, res) => {
 //   try {
@@ -122,7 +118,6 @@ exports.update = async (req, res) => {
 //     return res.status(400).send("Product list failed");
 //   }
 // };
-
 
 // List new arrivals with pagination
 exports.list = async (req, res) => {
@@ -149,9 +144,8 @@ exports.list = async (req, res) => {
   } catch (err) {
     console.log("Product listAll error --->", err);
     return res.status(400).send("Product listAll failed");
-}
-
-}
+  }
+};
 
 // Find total number of documents (products)
 exports.productsCount = async (req, res) => {
@@ -165,4 +159,78 @@ exports.productsCount = async (req, res) => {
   }
 };
 
+exports.productStar = async (req, res) => {
+  // Find product based on the route parameter
+  const product = await Product.findById(req.params.productId).exec();
+  // Logged in user who will be adding or updating the rating
+  // Find user based on user's email (authCheck middleware makes sure user is available from firebase)
+  const user = await User.findOne({ email: req.user.email }).exec();
+  // Destructuring rating number received from frontend
+  const { star } = req.body;
 
+  // Determine who is doing the update/add
+  // Check if currently logged in user have already added rating to this product?
+  // If yes, update. If no, add
+  // Access ratings array of the product
+  // and apply the find method
+  let existingRatingObject = product.ratings.find(
+    // Each element here is a rating object
+    // {star: Number, postedBy:{type: ObjectID, ref:"User"}}
+    // Check whether any of these objects have a postedBy
+    // (reference to userId) that is same as id of the user
+    // that is currenlty logged in (derived above)
+
+    // ele.postedBy === user._id won't work
+    // because of strict mongoose Id
+    // So we either have to use ==
+    // or === with toString() as below
+    (ele) => ele.postedBy.toString() === user._id.toString()
+  );
+  // If the currenlty logged in user haven't left a rating yet
+  // (existingRatingObject is and empty object - undefined), push
+  // the new rating to the ratings array (do not replaced the entire array)
+  if (existingRatingObject === undefined) {
+    let ratingAdded = await Product.findByIdAndUpdate(
+      // First argument (which product)
+      product._id,
+      // Second argument (which property to be updated)
+      { // Object syntax for pushing to ratings array
+        // this object has a star and posteBy which
+        // is the already logged-in user Id
+        $push: { ratings: { star, postedBy: user._id } },
+      },
+      // Third argument
+      // Necessary for returning the updated rating information in json format
+      { new: true }
+    ).exec();
+    console.log("ratingAdded", ratingAdded);
+    res.json(ratingAdded);
+  } else {
+    // if the user has already left a rating,
+    // update the rating array.
+    // What we need to do here is to not only
+    // find the product model but also one of the
+    // nested properties (here product.ratings) and
+    // then update one of the matching objects
+    // withing the product.ratings
+    const ratingUpdated = await Product.updateOne(
+      {
+        // Find the existing matching object
+        // find in ratings array the element that
+        // we want to match which is the existing
+        // rating object. This existing rating object
+        // has a ratings property (star) and posteBy
+        ratings: { $elemMatch: existingRatingObject },
+      },
+      // At this point we have found the element
+      // we want to update
+      // we only need to update the ratings
+      // property for the matching object
+      { $set: { "ratings.$.star": star } },
+        // Necessary for returning the updated rating information in json format
+      { new: true }
+    ).exec();
+    console.log("ratingUpdated", ratingUpdated);
+    res.json(ratingUpdated);
+  }
+};
