@@ -164,7 +164,7 @@ exports.productStar = async (req, res) => {
   // Find product based on the route parameter
   const product = await Product.findById(req.params.productId).exec();
   // Logged in user who will be adding or updating the rating
-  // Find user based on user's email (authCheck middleware makes sure user is available from firebase)
+  // Find user based on user's email (authCheck middleware makes sure user is available from firebase on req.user)
   const user = await User.findOne({ email: req.user.email }).exec();
   // Destructuring rating number received from frontend
   const { star } = req.body;
@@ -235,3 +235,34 @@ exports.productStar = async (req, res) => {
     res.json(ratingUpdated);
   }
 };
+
+// Find related products based on category
+// excluding the product itseld
+exports.listRelated = async (req, res) => {
+  // Find product
+  const product = await Product.findById(req.params.productId).exec();
+// Find product excluding the current product
+// find method can take more than one argument
+  const related = await Product.find({
+    // this alone is not enough
+    _id: { $ne: product._id },
+    // All the products that has the same category
+    category: product.category,
+  })
+    .limit(3)
+    .populate("category")
+    .populate("subs")
+    // This returns all of
+    // user's information
+    .populate("postedBy")
+    // or you can be more selective
+    // by including just specific fields
+    // .populate("postedBy", "_id name")
+    // Not sending a field
+    // .populate("postedBy", "_password")
+
+    .exec();
+
+  res.json(related);
+};
+

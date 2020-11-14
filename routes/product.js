@@ -13,7 +13,8 @@ const {
   read,
   update,
   productsCount,
-  productStar
+  productStar,
+  listRelated
 } = require("../controllers/product");
 
 // Routes
@@ -52,5 +53,8 @@ router.post("/products", list);
 // Find product based on the product id
 // Put request since we are updating the rating
 router.put("/product/star/:productId", authCheck, productStar);
+
+// Return related products
+router.get("/product/related/:productId", listRelated);
 
 module.exports = router;
