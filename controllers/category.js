@@ -1,4 +1,5 @@
 const Category = require("../models/category");
+const Product = require("../models/product");
 const Subcategory = require("../models/subcategory");
 const slugify = require("slugify");
 
@@ -36,23 +37,50 @@ exports.list = async (req, res) => {
   }
 };
 
+// // Return an object
+// // containing the information for a single requested category
+// // This method does not return all the asscoiated products
+// // that share the same category
+// exports.read = async (req, res) => {
+//   // req.params contains the route parameter (i.e., the requested category)
+//   let category = await Category.findOne({ slug: req.params.slug }).exec();
+
+//   if (err) {
+//     console.log("Category read error --->", err);
+//     res.status(400).send("Category read failed");
+//   }
+
+//   // // If not using async await the above would be written as
+//   // let category = await Category.findOne({ slug: req.params.slug }).exec((err, data) => {
+//   //   data // category
+//   // });
+
+//   res.json(category);
+// };
+
 // Return an object
-// containing the information for a single requested category
+// containing the information for a single requested category and
+// all related products based on the category id
+// Used when user clicks on one of the categories
+// listed in the homepage
 exports.read = async (req, res) => {
-  // req.params contains the route parameter (i.e., the requested category)
   let category = await Category.findOne({ slug: req.params.slug }).exec();
 
-  if (err) {
-    console.log("Category read error --->", err);
-    res.status(400).send("Category read failed");
-  }
+  // Query products as well
+  // No need to specify category._id as Mongoose
+  // automatically detects that id is meant here
+  // therefore Product.find({category:category})
+  // which is equivalent to the following
+  const products = await Product.find({ category })
+    .populate("category")
+    // no postedBy in product model
+    // .populate('postedBy', "_id name")
+    .exec();
 
-  // // If not using async await the above would be written as
-  // let category = await Category.findOne({ slug: req.params.slug }).exec((err, data) => {
-  //   data // category
-  // });
-
-  res.json(category);
+  res.json({
+    category,
+    product,
+  });
 };
 
 // Return an object containing
@@ -94,8 +122,8 @@ exports.remove = async (req, res) => {
 };
 
 // Return an object
-// containing infomation for all the subcategoriers that share the same parent
-// alternative to async await
+// containing infomation for all the subcategories that share the same parent
+// alternative to async await syntax
 exports.getSubs = (req, res) => {
   Subcategory.find({ parent: req.params._id }).exec((err, subcategories) => {
     if (err) {
