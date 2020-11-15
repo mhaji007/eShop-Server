@@ -79,7 +79,7 @@ exports.read = async (req, res) => {
 
   res.json({
     category,
-    product,
+    products,
   });
 };
 

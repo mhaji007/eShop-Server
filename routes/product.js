@@ -14,7 +14,8 @@ const {
   update,
   productsCount,
   productStar,
-  listRelated
+  listRelated,
+  searchFilters
 } = require("../controllers/product");
 
 // Routes
@@ -56,5 +57,16 @@ router.put("/product/star/:productId", authCheck, productStar);
 
 // Return related products
 router.get("/product/related/:productId", listRelated);
+
+// Search request endpoint
+// post method is used here since with post
+// it is very easy to send additional parameters
+// in the request body
+// We will be sending different search options such as search queries,
+// proce, category, brand, etc. to get the products
+// Creating 10 different endpoints here to catch all cases is
+// not feasible. Instead one flexible endpoint is created.
+
+router.post('/search/filters', searchFilters);
 
 module.exports = router;

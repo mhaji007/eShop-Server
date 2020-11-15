@@ -266,3 +266,28 @@ exports.listRelated = async (req, res) => {
   res.json(related);
 };
 
+// Search
+
+// Handle search query
+const handleQuery = async (req, res, query) => {
+  // Text-based search 
+  const products = await Product.find({ $text: { $search: query } })
+    .populate("category", "_id name")
+    .populate("subs", "_id name")
+    .populate("postedBy", "_id name")
+    .exec();
+
+  res.json(products);
+};
+
+exports.searchFilters = async (req, res) => {
+  // Destructure search query from body
+  const { query } = req.body;
+
+  if (query) {
+    console.log("query", query);
+    await handleQuery(req, res, query);
+  }
+};
+
+

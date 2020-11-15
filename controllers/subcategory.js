@@ -1,4 +1,5 @@
 const SubCategory = require("../models/subcategory");
+const Product = require("../models/product");
 const slugify = require("slugify");
 
 exports.create = async (req, res) => {
@@ -22,16 +23,39 @@ exports.list = async (req, res) => {
   }
 };
 
+
+// // Return an object
+// // containing the information for a single requested subcategory
+// // This method does not return all the asscoiated products
+// // that share the same subcategory
+// exports.read = async (req, res) => {
+//   try {
+//     let subcategory = await SubCategory.findOne({
+//       slug: req.params.slug,
+//     }).exec();
+//     res.json(subcategory);
+//   } catch (err) {
+//     console.log("Subcategory read error --->", err);
+//     res.status(400).send("Subcategory read failed");
+//   }
+// };
+
+
+// Return an object
+// containing the information for a single requested subcategory and
+// all related products based on the subcategory id
+// Used when user clicks on one of the subcategories
+// listed in the homepage
 exports.read = async (req, res) => {
-  try {
-    let subcategory = await SubCategory.findOne({
-      slug: req.params.slug,
-    }).exec();
-    res.json(subcategory);
-  } catch (err) {
-    console.log("Subcategory read error --->", err);
-    res.status(400).send("Subcategory read failed");
-  }
+  let sub = await SubCategory.findOne({ slug: req.params.slug }).exec();
+  const products = await Product.find({ subs: sub })
+    .populate("category")
+    .exec();
+
+  res.json({
+    sub,
+    products,
+  });
 };
 
 exports.update = async (req, res) => {
