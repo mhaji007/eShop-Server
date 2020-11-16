@@ -269,8 +269,11 @@ exports.listRelated = async (req, res) => {
 // Search
 
 // Handle search query
+// If user's text input matches those
+// in title or description of a product
+// send back that product as json response
 const handleQuery = async (req, res, query) => {
-  // Text-based search 
+  // Text-based search
   const products = await Product.find({ $text: { $search: query } })
     .populate("category", "_id name")
     .populate("subs", "_id name")
@@ -282,6 +285,8 @@ const handleQuery = async (req, res, query) => {
 
 exports.searchFilters = async (req, res) => {
   // Destructure search query from body
+  // search term is sent in from frontend
+  // in the form of { query: text } in the body
   const { query } = req.body;
 
   if (query) {
