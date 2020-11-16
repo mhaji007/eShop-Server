@@ -195,7 +195,8 @@ exports.productStar = async (req, res) => {
       // First argument (which product)
       product._id,
       // Second argument (which property to be updated)
-      { // Object syntax for pushing to ratings array
+      {
+        // Object syntax for pushing to ratings array
         // this object has a star and posteBy which
         // is the already logged-in user Id
         $push: { ratings: { star, postedBy: user._id } },
@@ -228,7 +229,7 @@ exports.productStar = async (req, res) => {
       // we only need to update the ratings
       // property for the matching object
       { $set: { "ratings.$.star": star } },
-        // Necessary for returning the updated rating information in json format
+      // Necessary for returning the updated rating information in json format
       { new: true }
     ).exec();
     console.log("ratingUpdated", ratingUpdated);
@@ -241,8 +242,8 @@ exports.productStar = async (req, res) => {
 exports.listRelated = async (req, res) => {
   // Find product
   const product = await Product.findById(req.params.productId).exec();
-// Find product excluding the current product
-// find method can take more than one argument
+  // Find product excluding the current product
+  // find method can take more than one argument
   const related = await Product.find({
     // this alone is not enough
     _id: { $ne: product._id },
@@ -274,6 +275,8 @@ exports.listRelated = async (req, res) => {
 // send back that product as json response
 const handleQuery = async (req, res, query) => {
   // Text-based search
+  // In product model for title and description fields
+  // the property text: true was added to facilitate search by text
   const products = await Product.find({ $text: { $search: query } })
     .populate("category", "_id name")
     .populate("subs", "_id name")
@@ -283,16 +286,45 @@ const handleQuery = async (req, res, query) => {
   res.json(products);
 };
 
+// Hanle price range
+
+// Price will be coming in
+// in the form of an array (e.g., [20, 50])
+// Send back all the prices that are
+// in between the range
+const handlePrice = async (req, res, price) => {
+  try {
+    let products = await Product.find({
+      price: {
+        // Should be greater than first value
+        $gte: price[0],
+        // Should be less than second value
+        $lte: price[1],
+      },
+    })
+      .populate("category", "_id name")
+      .populate("subs", "_id name")
+      .populate("postedBy", "_id name")
+      .exec();
+    res.json(products);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.searchFilters = async (req, res) => {
   // Destructure search query from body
   // search term is sent in from frontend
   // in the form of { query: text } in the body
-  const { query } = req.body;
+  const { query, price } = req.body;
 
   if (query) {
     console.log("query", query);
     await handleQuery(req, res, query);
   }
+
+  if (price !== undefined) {
+    console.log("price", price);
+    await handlePrice(req, res, price);
+  }
 };
-
-
