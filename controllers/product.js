@@ -311,40 +311,103 @@ const handlePrice = async (req, res, price) => {
     console.log(err);
   }
 };
-
+// Handle category
+// Categories will be coming in in the form
+// of an array of non-duplicate values after
+// user clicks on any of the checkboxes in Shop page
 const handleCategory = async (req, res, category) => {
   try {
-    let products = await Product.find({
-      category,
-    })
+    let products = await Product.find({ category })
       .populate("category", "_id name")
       .populate("subs", "_id name")
       .populate("postedBy", "_id name")
       .exec();
+
     res.json(products);
   } catch (err) {
     console.log(err);
   }
 };
 
+const handleStar = (req, res, stars) => {
+  // Utilize project aggregation
+  // Pass along the documents with the
+  // requested fields to the next stage
+  // in the pipeline
+  // Since ratings field in the product model
+  // is not structured the same as other fields
+  // (there could be many different ratings from
+  // many different people), there is a neeed to
+  // aggregate another project
+  Product.aggregate([
+    {
+      $project: {
+        // Fields from the input document (title, description, slug, etc.)
+        // document: "$$ROOT" is a special method that grants
+        // access to the entire project document
+        // otherwise all fields were to be added like
+        // below and then add the averageRating
+        // filed at the end
+
+        // title:"$title",
+        // description:"$description",
+        //...
+        // averageRating: ...
+
+        document: "$$ROOT",
+        // Newly computed field
+        floorAverage: {
+          $floor: {
+            $avg: "$ratings.star",
+          },
+        },
+      },
+    },
+    // Check if the star clicked on by the user
+    // is equal to the average of
+    // all the stars
+    { $match: { floorAverage: stars } },
+  ])
+    .limit(12)
+    .exec((err, aggregates) => {
+      // Instead of using async await
+      // exec with a call back funciton is used
+      if (err) console.log("Aggregate error", err);
+      // Since a new project is generated
+      // Product.find is applied here in the aggergate
+      Product.find({ _id: aggregates })
+        .populate("category", "_id name")
+        .populate("subs", "_id name")
+        .populate("postedBy", "_id name")
+        .exec(er, (products) => {
+          if (err) console.log("Product aggregate error");
+          res.json(products);
+        });
+    });
+};
+
 exports.searchFilters = async (req, res) => {
   // Destructure search query from body
   // search term is sent in from frontend
   // in the form of { query: text } in the body
-  const { query, price, category } = req.body;
+  const { query, price, category, stars } = req.body;
 
   if (query) {
-    console.log("query", query);
+    console.log("query  ---> ", query);
     await handleQuery(req, res, query);
   }
 
   if (price !== undefined) {
-    console.log("price", price);
+    console.log("price  ---> ", price);
     await handlePrice(req, res, price);
   }
 
   if (category) {
-    console.log("category", category);
+    console.log("category ---> ", category);
     await handleCategory(req, res, category);
+  }
+  if (stars) {
+    console.log("stars ---> ", stars);
+    await handleStar(req, res, stars);
   }
 };
