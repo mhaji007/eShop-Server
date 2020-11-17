@@ -379,18 +379,28 @@ const handleStar = (req, res, stars) => {
         .populate("category", "_id name")
         .populate("subs", "_id name")
         .populate("postedBy", "_id name")
-        .exec(er, (products) => {
+        .exec((err, products) => {
           if (err) console.log("Product aggregate error");
           res.json(products);
         });
     });
 };
 
+const handleSubcategory = async (req, res, subcategory) => {
+  const products = await Product.find({ subs: subcategory })
+    .populate("category", "_id name")
+    .populate("subs", "_id name")
+    .populate("postedBy", "_id name")
+    .exec();
+
+  res.json(products);
+};
+
 exports.searchFilters = async (req, res) => {
   // Destructure search query from body
   // search term is sent in from frontend
   // in the form of { query: text } in the body
-  const { query, price, category, stars } = req.body;
+  const { query, price, category, stars, subcategory } = req.body;
 
   if (query) {
     console.log("query  ---> ", query);
@@ -409,5 +419,9 @@ exports.searchFilters = async (req, res) => {
   if (stars) {
     console.log("stars ---> ", stars);
     await handleStar(req, res, stars);
+  }
+  if (subcategory) {
+    console.log("stars ---> ", subcategory);
+    await handleSubcategory(req, res, subcategory);
   }
 };
