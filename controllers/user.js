@@ -1,14 +1,14 @@
+
+const User = require("../models/user");
+const Product = require("../models/product");
+const Cart = require("../models/cart");
+
 // Receive request from frontend
 // add additional fields received from
 // the frontend and create a new product
 // for each product in the cart
 // create a new cart and save
 // it to the databsae
-
-const User = require("../models/user");
-const Product = require("../models/product");
-const Cart = require("../models/cart");
-
 exports.userCart = async (req, res) => {
   // console.log(req.body); // {cart: []}
 
@@ -55,13 +55,13 @@ exports.userCart = async (req, res) => {
     object.count = cart[i].count;
     object.color = cart[i].color;
 
-    // Get price for creating total
-    // from the database
+    // Calculate price based on information
+    // from the database without relying on the frontend data
     // The reson we are finding this product by
     // querying the database and not relying on the data
     // received from frontend is because on the frontend
-    // the values could stored in the local storage and sent
-    // back could have been easily compromised
+    // the values are stored in the local storage and then sent
+    // back. Therefore they could have easily been compromised
 
     // findbyId returns the whole object
     // select, selects the specified field
@@ -71,6 +71,19 @@ exports.userCart = async (req, res) => {
     // Push the new object to the products array
     products.push(object);
   }
+
+
+  exports.getUserCart = async (req, res) => {
+    const user = await User.findOne({ email: req.user.email }).exec();
+
+    let cart = await Cart.findOne({ orderdBy: user._id })
+      .populate("products.product", "_id title price totalAfterDiscount")
+      .exec();
+
+    const { products, cartTotal, totalAfterDiscount } = cart;
+    res.json({ products, cartTotal, totalAfterDiscount });
+  };
+
 
   // console.log('products', products)
 
@@ -95,4 +108,21 @@ exports.userCart = async (req, res) => {
   // Redirect user to the checkout page
   // based on the ok response
   res.json({ ok: true });
+};
+
+
+exports.getUserCart = async (req, res) => {
+  const user = await User.findOne({ email: req.user.email }).exec();
+
+  let cart = await Cart.findOne({ orderedBy: user._id })
+  // Populate the nested producy field
+  // Choose the desired fields
+    .populate("products.product", "_id title price totalAfterDiscount")
+    .exec();
+  // Break down the large object
+  // Now instead of req.data.cart.poducts
+  // if we  had used res.json(cart)
+  // we can use req.data.products
+  const { products, cartTotal, totalAfterDiscount } = cart;
+  res.json({ products, cartTotal, totalAfterDiscount });
 };
