@@ -65,8 +65,8 @@ exports.userCart = async (req, res) => {
 
     // findbyId returns the whole object
     // select, selects the specified field
-    let { price } = await Product.findById(cart[i]._id).select("price").exec();
-    object.price = price;
+    let productFromDB = await Product.findById(cart[i]._id).select("price").exec();
+    object.price = productFromDB.price;
 
     // Push the new object to the products array
     products.push(object);
@@ -142,3 +142,11 @@ exports.emptyUserCart = async (req, res) => {
   res.json(cart);
 };
 
+exports.saveAddress = async (req, res) => {
+  const userAddress = await User.findOneAndUpdate(
+    { email: req.user.email },
+    { address: req.body.address }
+  ).exec();
+
+  res.json({ ok: true });
+};
