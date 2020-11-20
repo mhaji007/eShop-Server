@@ -31,7 +31,7 @@ exports.userCart = async (req, res) => {
 
   // Check if cart with logged in user id already exists
   // If user has already had a cart with items and is coming back again
-  let cartExistByThisUser = await Cart.findOne({ orderdBy: user._id }).exec();
+  let cartExistByThisUser = await Cart.findOne({ orderedBy: user._id }).exec();
   // Remove the existing cart and start fresh
   // so there are no duplicates.
   // Each user will only have one cart
@@ -70,15 +70,20 @@ exports.userCart = async (req, res) => {
 
     // Push the new object to the products array
     products.push(object);
+    console.log("new products =====> ", products)
   }
 
 
   exports.getUserCart = async (req, res) => {
     const user = await User.findOne({ email: req.user.email }).exec();
 
-    let cart = await Cart.findOne({ orderdBy: user._id })
+    let cart = await Cart.findOne({ orderedBy: user._id })
       .populate("products.product", "_id title price totalAfterDiscount")
       .exec();
+
+      console.log("new cart =====> ", cart)
+      console.log("products destructured ========> ", JSON,stringify(cart.products, null , 4 ))
+
 
     const { products, cartTotal, totalAfterDiscount } = cart;
     res.json({ products, cartTotal, totalAfterDiscount });
@@ -101,7 +106,7 @@ exports.userCart = async (req, res) => {
   let newCart = await new Cart({
     products,
     cartTotal,
-    orderdBy: user._id,
+    orderedBy: user._id,
   }).save();
 
   console.log("new cart", newCart);
@@ -123,6 +128,11 @@ exports.getUserCart = async (req, res) => {
   // Now instead of req.data.cart.poducts
   // if we  had used res.json(cart)
   // we can use req.data.products
+
+  console.log("User from getUserCart =========> ", user)
+
+  console.log("Respone from getUserCart =========> ", cart)
   const { products, cartTotal, totalAfterDiscount } = cart;
   res.json({ products, cartTotal, totalAfterDiscount });
+
 };
