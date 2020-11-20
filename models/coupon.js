@@ -25,4 +25,4 @@ const couponSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Cart", couponSchema);
+module.exports = mongoose.model("Coupon", couponSchema);
