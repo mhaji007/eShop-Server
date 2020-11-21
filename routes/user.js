@@ -5,7 +5,7 @@ const router = express.Router();
 // Import middlewares
 const { authCheck } = require("../middlewares/auth");
 // Import controllers
-const { userCart, getUserCart, emptyUserCart, saveAddress } = require("../controllers/user");
+const { userCart, getUserCart, emptyUserCart, saveAddress, applyCouponToUserCart } = require("../controllers/user");
 
 // Save cart
 router.post("/user/cart", authCheck, userCart);
@@ -21,5 +21,8 @@ router.post("/user/address", authCheck, saveAddress);
 //     data: "hey you hit user API endpoint",
 //   });
 // });
+
+// Apply coupon
+router.post("/user/cart/coupon", authCheck, applyCouponToUserCart);
 
 module.exports = router;
