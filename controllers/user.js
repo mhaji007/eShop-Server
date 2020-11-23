@@ -172,7 +172,7 @@ exports.applyCouponToUserCart = async (req, res) => {
 
   let { products, cartTotal } =
     // Retrieve cart belogning to the logged in user
-    await Cart.findOne({ orderdBy: user._id })
+    await Cart.findOne({ orderedBy: user._id })
     .populate("products.product", "_id title price")
     .exec();
 
@@ -185,7 +185,7 @@ exports.applyCouponToUserCart = async (req, res) => {
   ).toFixed(2);
 // Update logged in user's cart with the new totl
   Cart.findOneAndUpdate(
-    { orderdBy: user._id },
+    { orderedBy: user._id },
     { totalAfterDiscount },
     { new: true }
   );
