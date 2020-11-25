@@ -1,3 +1,10 @@
+// Endpoint for Initializing stripe.
+// This endpoint generates client secret
+// based on Stripe's secret API key.
+// This client secret is then sent back
+// to the frontend to create and display the widget
+// needed for taking in credit card details from the user
+
 const express = require('express');
 const router = express.Router();
 
