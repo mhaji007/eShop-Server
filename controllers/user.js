@@ -190,18 +190,25 @@ exports.applyCouponToUserCart = async (req, res) => {
 };
 
 exports.createOrder = async (req, res) => {
+
+  // console.log(req.body);
+
+  // return;
+
   // Retrieve paymnet intent from the frontend
-  const paymentIntent = req.body.stripeResponse;
+  const {paymentIntent} = req.body.stripeResponse;
   // Retrieve current user
   // The reson we need the user here
   // is we need to grab user's cart
   // because each order is basically a cart item
   // Now we need to save cart items as order and afterwards empty the card
-  const user = await User.findOne({ email: req.user.email }.exec());
+  const user = await User.findOne({ email: req.user.email }).exec();
 
   // Find the user's cart based on the id (retrieve all the products
   // ordered based on user id)
-  let { products } = await Cart.findOne({ orderedBy: user._id }).exec();
+  let  productsResult = await Cart.findOne({ orderedBy: user._id }).exec();
+
+  let {products} = productsResult;
 
   // Create a new order
   let newOrder = await new Order({

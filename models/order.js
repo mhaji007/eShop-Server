@@ -43,7 +43,7 @@ const orderSchema = new mongoose.Schema(
       // these particular values
       // are processed
       enum: [
-        "Not processed",
+        "Not Processed",
         "Processing",
         "Dispatched",
         "Cancelled",
@@ -56,3 +56,8 @@ const orderSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Order", orderSchema);
+
+
+
+
+
