@@ -28,11 +28,12 @@ exports.createPaymentIntent = async (req, res) => {
   );
 
   let finalAmount = 0;
-
+  // Stripe allow only integer value in price
+  // so need to change price into cent by (*100 )
   if (couponApplied && totalAfterDiscount) {
-    finalAmount = totalAfterDiscount * 100;
+    finalAmount = Math.round(totalAfterDiscount * 100);
   } else {
-    finalAmount = cartTotal * 100;
+    finalAmount = Math.round(cartTotal * 100);
   }
 
   // create payment intent with order amount and currency
@@ -43,6 +44,7 @@ exports.createPaymentIntent = async (req, res) => {
 
   res.send({
     clientSecret: paymentIntent.client_secret,
+    // To display on the frontend
     cartTotal,
     totalAfterDiscount,
     payable: finalAmount,
