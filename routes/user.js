@@ -5,7 +5,7 @@ const router = express.Router();
 // Import middlewares
 const { authCheck } = require("../middlewares/auth");
 // Import controllers
-const { userCart, getUserCart, emptyUserCart, saveAddress, applyCouponToUserCart } = require("../controllers/user");
+const { userCart, getUserCart, emptyUserCart, saveAddress, applyCouponToUserCart, createOrder } = require("../controllers/user");
 
 // Save cart
 router.post("/user/cart", authCheck, userCart);
@@ -15,6 +15,8 @@ router.get("/user/cart", authCheck, getUserCart);
 router.delete("/user/cart", authCheck, emptyUserCart);
 // Save user's address
 router.post("/user/address", authCheck, saveAddress);
+
+router.post("/user/order", authCheck, createOrder);
 
 // router.get("/user", (req, res) => {
 //   res.json({

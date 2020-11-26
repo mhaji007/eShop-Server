@@ -1,8 +1,8 @@
-
 const User = require("../models/user");
 const Product = require("../models/product");
 const Cart = require("../models/cart");
-const Coupon = require("../models/coupon")
+const Coupon = require("../models/coupon");
+const Order = require("../models/order");
 
 // Receive request from frontend
 // add additional fields received from
@@ -66,14 +66,15 @@ exports.userCart = async (req, res) => {
 
     // findbyId returns the whole object
     // select, selects the specified field
-    let productFromDB = await Product.findById(cart[i]._id).select("price").exec();
+    let productFromDB = await Product.findById(cart[i]._id)
+      .select("price")
+      .exec();
     object.price = productFromDB.price;
 
     // Push the new object to the products array
     products.push(object);
-    console.log("new products =====> ", products)
+    console.log("new products =====> ", products);
   }
-
 
   exports.getUserCart = async (req, res) => {
     const user = await User.findOne({ email: req.user.email }).exec();
@@ -82,14 +83,12 @@ exports.userCart = async (req, res) => {
       .populate("products.product", "_id title price totalAfterDiscount")
       .exec();
 
-      // console.log("new cart =====> ", cart)
-      // console.log("products destructured ========> ", JSON,stringify(cart.products, null , 4 ))
-
+    // console.log("new cart =====> ", cart)
+    // console.log("products destructured ========> ", JSON,stringify(cart.products, null , 4 ))
 
     const { products, cartTotal, totalAfterDiscount } = cart;
     res.json({ products, cartTotal, totalAfterDiscount });
   };
-
 
   // console.log('products', products)
 
@@ -116,13 +115,12 @@ exports.userCart = async (req, res) => {
   res.json({ ok: true });
 };
 
-
 exports.getUserCart = async (req, res) => {
   const user = await User.findOne({ email: req.user.email }).exec();
 
   let cart = await Cart.findOne({ orderedBy: user._id })
-  // Populate the nested producy field
-  // Choose the desired fields
+    // Populate the nested product fields
+    // Choose the desired fields
     .populate("products.product", "_id title price totalAfterDiscount")
     .exec();
   // Break down the large object
@@ -132,7 +130,6 @@ exports.getUserCart = async (req, res) => {
 
   const { products, cartTotal, totalAfterDiscount } = cart;
   res.json({ products, cartTotal, totalAfterDiscount });
-
 };
 
 exports.emptyUserCart = async (req, res) => {
@@ -151,7 +148,6 @@ exports.saveAddress = async (req, res) => {
 
   res.json({ ok: true });
 };
-
 
 exports.applyCouponToUserCart = async (req, res) => {
   const { coupon } = req.body;
@@ -173,8 +169,8 @@ exports.applyCouponToUserCart = async (req, res) => {
   let { products, cartTotal } =
     // Retrieve cart belogning to the logged in user
     await Cart.findOne({ orderedBy: user._id })
-    .populate("products.product", "_id title price")
-    .exec();
+      .populate("products.product", "_id title price")
+      .exec();
 
   console.log("cartTotal", cartTotal, "discount%", validCoupon.discount);
 
@@ -183,7 +179,7 @@ exports.applyCouponToUserCart = async (req, res) => {
     cartTotal -
     (cartTotal * validCoupon.discount) / 100
   ).toFixed(2);
-// Update logged in user's cart with the new totl
+  // Update logged in user's cart with the new totl
   Cart.findOneAndUpdate(
     { orderedBy: user._id },
     { totalAfterDiscount },
@@ -191,4 +187,28 @@ exports.applyCouponToUserCart = async (req, res) => {
   ).exec();
 
   res.json(totalAfterDiscount);
+};
+
+exports.createOrder = async (req, res) => {
+  // Retrieve paymnet intent from the frontend
+  const paymentIntent = req.body.stripeResponse;
+  // Retrieve current user
+  // The reson we need the user here
+  // is we need to grab user's cart
+  // because each order is basically a cart item
+  // Now we need to save cart items as order and afterwards empty the card
+  const user = await User.findOne({ email: req.user.email }.exec());
+
+  // Find the user's cart based on the id (retrieve all the products
+  // ordered based on user id)
+  let { products } = await Cart.findOne({ orderedBy: user._id }).exec();
+
+  // Create a new order
+  let newOrder = await new Order({
+    products,
+    paymentIntent,
+    orderedBy: user._id,
+  }).save();
+  console.log(" New order saved", newOrder);
+  res.json({ ok: true });
 };
