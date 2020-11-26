@@ -190,25 +190,26 @@ exports.applyCouponToUserCart = async (req, res) => {
 };
 
 exports.createOrder = async (req, res) => {
-
   // console.log(req.body);
 
   // return;
 
   // Retrieve paymnet intent from the frontend
-  const {paymentIntent} = req.body.stripeResponse;
+  // Note: Incorrect destructring here (without parantheses) may cause paymentIntent
+  // to be saved inside another paymentIntent object in the database
+  const { paymentIntent } = req.body.stripeResponse;
   // Retrieve current user
-  // The reson we need the user here
-  // is we need to grab user's cart
-  // because each order is basically a cart item
-  // Now we need to save cart items as order and afterwards empty the card
+  // the reson we need the user here
+  // is because we need to grab user's cart
+  // since each order is basically a cart item.
+  // Now, we need to save cart items as an order and afterwards empty the cart
   const user = await User.findOne({ email: req.user.email }).exec();
 
-  // Find the user's cart based on the id (retrieve all the products
+  // Find user's cart based on the id (retrieve all the products
   // ordered based on user id)
-  let  productsResult = await Cart.findOne({ orderedBy: user._id }).exec();
+  let productsResult = await Cart.findOne({ orderedBy: user._id }).exec();
 
-  let {products} = productsResult;
+  let { products } = productsResult;
 
   // Create a new order
   let newOrder = await new Order({
@@ -216,6 +217,22 @@ exports.createOrder = async (req, res) => {
     paymentIntent,
     orderedBy: user._id,
   }).save();
+
+  // Decrement quantity, increment sold
+  let bulkOption = products.map((item) => {
+    return {
+      updateOne: {
+        // IMPORTANT item.productzx
+        // since products is an array
+        filter: { _id: item.product._id },
+        update: { $inc: { quantity: -item.count, sold: +item.count } },
+      },
+    };
+  });
+
+  let updated = await Product.bulkWrite(bulkOption, {});
+  console.log("Product quantity-- And Sold++", updated);
+
   console.log(" New order saved", newOrder);
   res.json({ ok: true });
 };
