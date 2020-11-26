@@ -19,7 +19,7 @@ router.post("/user/address", authCheck, saveAddress);
 // Create order
 router.post("/user/order", authCheck, createOrder);
 // Get orders
-router.post("/user/order", authCheck, orders);
+router.get("/user/orders", authCheck, orders);
 
 // router.get("/user", (req, res) => {
 //   res.json({
