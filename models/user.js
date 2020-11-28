@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
     // Save productId and based on that
     // we will be able to access all the
     // product information based on that Id
-    // wishlist: [{type: ObjectId, ref:"Product"}],
+    wishlist: [{ type: ObjectId, ref: "Product" }],
   },
   { timestamps: true }
 );
