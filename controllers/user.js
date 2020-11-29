@@ -1,8 +1,10 @@
+
 const User = require("../models/user");
 const Product = require("../models/product");
 const Cart = require("../models/cart");
 const Coupon = require("../models/coupon");
 const Order = require("../models/order");
+const uniqueid = require("uniqueid");
 
 // Receive request from frontend
 // add additional fields received from
@@ -240,16 +242,15 @@ exports.createOrder = async (req, res) => {
 exports.orders = async (req, res) => {
   let user = await User.findOne({ email: req.user.email }).exec();
 
-    // Each order has an array of products
-    // and each product has only id
+  // Each order has an array of products
+  // and each product has only id
 
   let userOrders = await Order.find({ orderedBy: user._id })
     .populate("products.product")
     .exec();
 
-    res.json(userOrders);
+  res.json(userOrders);
 };
-
 
 //addToWishlist wishlist removeFromWishlist
 exports.addToWishlist = async (req, res) => {
@@ -282,3 +283,28 @@ exports.removeFromWishlist = async (req, res) => {
   res.json({ ok: true });
 };
 
+
+// Cash on order
+exports.createCashOrder = async (req, res) => {
+  const { COD } = req.body;
+  // if COD is true, create order with status of Cash On Delivery
+
+  if (!COD) return res.status(400).send("Create cash order failed");
+
+  const user = await User.findOne({ email: req.user.email }).exec();
+
+  let userCart = await Cart.findOne({ orderdBy: user._id }).exec();
+
+  let newOrder = await new Order({
+    products: userCart.products,
+    paymentIntent: {
+      id: uniqueid(),
+      amount: userCart.cartTotal,
+      currency: "usd",
+      status: "Cash On Delivery",
+      created: Date.now(),
+      payment_method_types: ["cash"],
+    },
+    orderdBy: user._id,
+  }).save();
+};
